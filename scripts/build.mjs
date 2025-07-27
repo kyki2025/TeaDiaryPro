@@ -10,7 +10,7 @@ const args = process.argv.slice(2)
 const isProd = args[0] === '--production'
 
 // 保存配置文件
-const configFiles = ['_headers', '_redirects']
+const configFiles = ['_headers', '_redirects', 'wrangler.toml']
 const savedConfigs = {}
 
 // 在清空 dist 目录前保存配置文件
