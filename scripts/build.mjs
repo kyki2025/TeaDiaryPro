@@ -70,31 +70,36 @@ if (isProd) {
   
   // 如果没有保存的配置文件，创建默认的
   if (!savedConfigs['_headers']) {
-    const headersContent = `# 设置正确的 MIME 类型
+    const headersContent = `# 设置正确的 MIME 类型和安全头
 /*.css
   Content-Type: text/css
+  Cache-Control: public, max-age=31536000
 
 /*.js
   Content-Type: application/javascript
-
-/*.html
-  Content-Type: text/html
-
-# 缓存控制
-/*.css
-  Cache-Control: public, max-age=31536000
-
-/*.js
   Cache-Control: public, max-age=31536000
 
 /*.html
+  Content-Type: text/html; charset=utf-8
   Cache-Control: public, max-age=0, must-revalidate
 
-# 安全头
+# 全局安全头
 /*
   X-Frame-Options: DENY
   X-Content-Type-Options: nosniff
-  Referrer-Policy: strict-origin-when-cross-origin`
+  X-XSS-Protection: 1; mode=block
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: geolocation=(), microphone=(), camera=()
+
+# 特定文件类型的 MIME 设置
+/main.css
+  Content-Type: text/css; charset=utf-8
+
+/main.js
+  Content-Type: application/javascript; charset=utf-8
+
+/index.html
+  Content-Type: text/html; charset=utf-8`
     fs.writeFileSync(path.join('dist', '_headers'), headersContent)
     console.log('创建默认 _headers 文件')
   }
