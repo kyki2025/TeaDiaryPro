@@ -1,0 +1,20 @@
+{
+  "path": "/Users/a1/codebuddy/TeaDiaryPro/dist",
+  "desc": "这是一个名为\"茶记\"的前端项目，用户可以记录和管理自己的品茶体验。主要功能包括茶记录管理、数据分析和数据同步。",
+  "id": "579b17fd785c425bb9a265f737516722",
+  "data": {
+    "spaceKey": "579b17fd785c425bb9a265f737516722",
+    "connections": {
+      "webIDE": "https://579b17fd785c425bb9a265f737516722.ap-singapore.cloudstudio.club",
+      "preview": "https://579b17fd785c425bb9a265f737516722--{port}.ap-singapore.cloudstudio.club",
+      "api": "https://579b17fd785c425bb9a265f737516722--api.ap-singapore.cloudstudio.club",
+      "pty": "https://579b17fd785c425bb9a265f737516722--pty.ap-singapore.cloudstudio.club"
+    }
+  },
+  "config": {
+    "api": "https://579b17fd785c425bb9a265f737516722--api.ap-singapore.cloudstudio.club",
+    "pty": "https://579b17fd785c425bb9a265f737516722--pty.ap-singapore.cloudstudio.club",
+    "region": "ap-shanghai",
+    "spaceKey": "579b17fd785c425bb9a265f737516722"
+  }
+}
