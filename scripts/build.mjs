@@ -30,6 +30,12 @@ if (!fs.existsSync('dist')) {
   fs.mkdirSync('dist')
 }
 
+// 复制 public 目录到 dist
+if (fs.existsSync('public')) {
+  fs.cpSync('public', 'dist', { recursive: true })
+  console.log('复制 public 目录到 dist')
+}
+
 /**
  * @type {esbuild.BuildOptions}
  */

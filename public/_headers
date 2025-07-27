@@ -1,0 +1,14 @@
+/*.css
+  Content-Type: text/css
+
+/*.js
+  Content-Type: application/javascript
+
+/main.css
+  Content-Type: text/css
+
+/main.js
+  Content-Type: application/javascript
+
+/*
+  X-Content-Type-Options: nosniff
