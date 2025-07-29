@@ -4,6 +4,10 @@ compatibility_date = "2023-12-01"
 # Workers 项目配置
 main = "dist/worker.js"
 
+# 构建配置
+[build]
+command = "npm run build"
+
 # 静态资产配置 (Workers Sites)
 [site]
 bucket = "dist"
