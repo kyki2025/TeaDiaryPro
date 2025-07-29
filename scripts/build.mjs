@@ -41,7 +41,7 @@ if (fs.existsSync('public')) {
  */
 const webAppOpts = {
   color: true,
-  entryPoints: ['src/main.tsx', 'index.html'],
+  entryPoints: ['src/main.tsx'],
   outdir: 'dist',
   entryNames: '[name]',
   write: true,
@@ -52,8 +52,11 @@ const webAppOpts = {
   treeShaking: true,
   jsx: 'automatic',
   loader: {
-    '.html': 'copy',
     '.png': 'file',
+    '.jpg': 'file',
+    '.jpeg': 'file',
+    '.gif': 'file',
+    '.svg': 'file',
   },
   plugins: [
     stylePlugin({
