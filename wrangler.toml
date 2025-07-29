@@ -14,6 +14,11 @@ bucket = "dist"
 include = ["**/*"]
 exclude = []
 
+# KV 命名空间绑定
+[[kv_namespaces]]
+binding = "TEADIARY_DATA"
+id = "f5b0962a0fd1417babacb8b35ae1514b"
+
 # 环境变量
 [vars]
 API_VERSION = "1.0.0"
