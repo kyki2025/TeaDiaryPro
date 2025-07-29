@@ -7,7 +7,6 @@ main = "dist/worker.js"
 # 静态资产配置 (Workers Sites)
 [site]
 bucket = "dist"
-entry-point = "dist/worker.js"
 
 # KV 命名空间绑定
 [[kv_namespaces]]
