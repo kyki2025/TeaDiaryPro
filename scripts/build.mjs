@@ -43,7 +43,8 @@ const webAppOpts = {
   color: true,
   entryPoints: ['src/main.tsx'],
   outdir: 'dist',
-  entryNames: '[name]',
+  entryNames: '[name].[hash]',
+  assetNames: '[name].[hash]',
   write: true,
   bundle: true,
   format: 'iife',
@@ -51,6 +52,7 @@ const webAppOpts = {
   minify: isProd,
   treeShaking: true,
   jsx: 'automatic',
+  metafile: true,
   loader: {
     '.png': 'file',
     '.jpg': 'file',
@@ -90,7 +92,42 @@ const workerOpts = {
 if (isProd) {
   // 构建 Web 应用
   console.log('构建 Web 应用...')
-  await esbuild.build(webAppOpts)
+  const result = await esbuild.build(webAppOpts)
+  
+  // 更新HTML文件以引用生成的资源
+  const htmlPath = path.join('dist', 'index.html')
+  let htmlContent = fs.readFileSync(htmlPath, 'utf8')
+  
+  // 从metafile中获取生成的文件名
+  const outputs = result.metafile.outputs
+  let jsFile = '', cssFile = ''
+  
+  for (const [outputPath, output] of Object.entries(outputs)) {
+    const fileName = path.basename(outputPath)
+    if (fileName.startsWith('main.') && fileName.endsWith('.js')) {
+      jsFile = fileName
+    } else if (fileName.startsWith('main.') && fileName.endsWith('.css')) {
+      cssFile = fileName
+    }
+  }
+  
+  // 更新HTML内容
+  if (cssFile) {
+    htmlContent = htmlContent.replace(
+      '</head>',
+      `  <link rel="stylesheet" href="/${cssFile}">\n</head>`
+    )
+  }
+  
+  if (jsFile) {
+    htmlContent = htmlContent.replace(
+      '</body>',
+      `  <script src="/${jsFile}"></script>\n</body>`
+    )
+  }
+  
+  fs.writeFileSync(htmlPath, htmlContent)
+  console.log(`HTML文件已更新，引用: ${jsFile}, ${cssFile}`)
   
   // 构建 Worker
   console.log('构建 Worker...')
