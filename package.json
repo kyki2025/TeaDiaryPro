@@ -4,7 +4,7 @@
   "scripts": {
     "dev": "node scripts/build.mjs",
     "build": "node scripts/build.mjs --production && cp -r dist/* .",
-    "deploy": "wrangler deploy"
+    "deploy": "wrangler pages deploy . --project-name teadiarypro"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.0.1",
