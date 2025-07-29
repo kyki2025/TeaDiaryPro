@@ -18,7 +18,7 @@ export default {
         },
         {
           ASSET_NAMESPACE: env.__STATIC_CONTENT,
-          ASSET_MANIFEST: env.__STATIC_CONTENT_MANIFEST,
+          ...(env.__STATIC_CONTENT_MANIFEST && { ASSET_MANIFEST: env.__STATIC_CONTENT_MANIFEST }),
         }
       )
     } catch (e) {
@@ -32,7 +32,7 @@ export default {
             },
             {
               ASSET_NAMESPACE: env.__STATIC_CONTENT,
-              ASSET_MANIFEST: env.__STATIC_CONTENT_MANIFEST,
+              ...(env.__STATIC_CONTENT_MANIFEST && { ASSET_MANIFEST: env.__STATIC_CONTENT_MANIFEST }),
             }
           )
         } catch (indexError) {
