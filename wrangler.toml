@@ -2,7 +2,7 @@ name = "teadiarypro"
 compatibility_date = "2023-12-01"
 
 # Workers 项目配置
-main = "dist/worker.js"
+main = "worker.js"
 
 # 构建配置
 [build]
@@ -12,7 +12,7 @@ command = "npm run build"
 [site]
 bucket = "dist"
 include = ["**/*"]
-exclude = []
+exclude = ["worker.js"]
 
 # KV 命名空间绑定
 [[kv_namespaces]]
