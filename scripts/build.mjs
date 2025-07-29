@@ -39,7 +39,7 @@ if (fs.existsSync('public')) {
 /**
  * @type {esbuild.BuildOptions}
  */
-const esbuildOpts = {
+const webAppOpts = {
   color: true,
   entryPoints: ['src/main.tsx', 'index.html'],
   outdir: 'dist',
@@ -64,8 +64,34 @@ const esbuildOpts = {
   ],
 }
 
+/**
+ * @type {esbuild.BuildOptions}
+ */
+const workerOpts = {
+  color: true,
+  entryPoints: ['src/worker.js'],
+  outfile: 'dist/worker.js',
+  write: true,
+  bundle: true,
+  format: 'esm',
+  target: 'es2022',
+  sourcemap: isProd ? false : 'linked',
+  minify: isProd,
+  treeShaking: true,
+  external: ['__STATIC_CONTENT_MANIFEST'],
+  define: {
+    '__STATIC_CONTENT_MANIFEST': '__STATIC_CONTENT_MANIFEST',
+  },
+}
+
 if (isProd) {
-  await esbuild.build(esbuildOpts)
+  // 构建 Web 应用
+  console.log('构建 Web 应用...')
+  await esbuild.build(webAppOpts)
+  
+  // 构建 Worker
+  console.log('构建 Worker...')
+  await esbuild.build(workerOpts)
   
   // 恢复配置文件
   Object.keys(savedConfigs).forEach(file => {
@@ -116,8 +142,10 @@ if (isProd) {
     fs.writeFileSync(path.join('dist', '_redirects'), redirectsContent)
     console.log('创建默认 _redirects 文件')
   }
+  
+  console.log('构建完成！')
 } else {
-  const ctx = await esbuild.context(esbuildOpts)
+  const ctx = await esbuild.context(webAppOpts)
   await ctx.watch()
   const { hosts, port } = await ctx.serve()
   console.log(`Running on:`)

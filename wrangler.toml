@@ -1,0 +1,19 @@
+name = "teadiarypro"
+compatibility_date = "2023-12-01"
+
+# Workers 项目配置
+main = "dist/worker.js"
+
+# 静态资产配置 (Workers Sites)
+[site]
+bucket = "dist"
+entry-point = "dist/worker.js"
+
+# KV 命名空间绑定
+[[kv_namespaces]]
+binding = "TEADIARY_DATA"
+id = "teadiary-kv-namespace"
+
+# 环境变量
+[vars]
+API_VERSION = "1.0.0"
