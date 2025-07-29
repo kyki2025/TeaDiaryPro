@@ -6,11 +6,10 @@ compatibility_date = "2023-12-01"
 command = "npm run build"
 
 # 指定入口点和资产目录
-main = "./functions/_middleware.js"
+main = "./dist/functions/_middleware.js"
 
 [site]
-bucket = "."
-assets = "./dist"
+bucket = "./dist"
 
 # 添加KV命名空间绑定
 [[kv_namespaces]]
