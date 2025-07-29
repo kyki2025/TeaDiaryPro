@@ -4,43 +4,46 @@ export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url)
     
-    // 处理 API 请求
-    if (url.pathname.startsWith('/api/')) {
-      return handleApiRequest(request, env)
-    }
-    
-    // 处理静态文件
     try {
-      return await getAssetFromKV(
-        {
-          request,
-          waitUntil: ctx.waitUntil.bind(ctx),
-        },
-        {
-          ASSET_NAMESPACE: env.__STATIC_CONTENT,
-          ...(env.__STATIC_CONTENT_MANIFEST && { ASSET_MANIFEST: env.__STATIC_CONTENT_MANIFEST }),
-        }
-      )
-    } catch (e) {
-      // 对于SPA路由，返回index.html
-      if (e.status === 404) {
+      // 处理API请求
+      if (url.pathname.startsWith('/api/')) {
+        return handleApiRequest(request, env)
+      }
+      
+      // 处理静态文件
+      try {
+        const asset = await getAssetFromKV(
+          {
+            request,
+            waitUntil: ctx.waitUntil.bind(ctx),
+          },
+          {
+            ASSET_NAMESPACE: env.__STATIC_CONTENT,
+          }
+        )
+        return asset
+      } catch (e) {
+        // 如果找不到静态文件，返回index.html（用于SPA路由）
         try {
-          return await getAssetFromKV(
+          const indexRequest = new Request(`${url.origin}/index.html`, request)
+          const indexAsset = await getAssetFromKV(
             {
-              request: new Request(`${url.origin}/index.html`, request),
+              request: indexRequest,
               waitUntil: ctx.waitUntil.bind(ctx),
             },
             {
               ASSET_NAMESPACE: env.__STATIC_CONTENT,
-              ...(env.__STATIC_CONTENT_MANIFEST && { ASSET_MANIFEST: env.__STATIC_CONTENT_MANIFEST }),
             }
           )
+          return indexAsset
         } catch (indexError) {
+          console.error('Static file error:', indexError)
           return new Response('Not Found', { status: 404 })
         }
       }
-      
-      return new Response('Server Error', { status: 500 })
+    } catch (error) {
+      console.error('Worker error:', error)
+      return new Response('Internal Server Error', { status: 500 })
     }
   },
 }
@@ -48,95 +51,14 @@ export default {
 async function handleApiRequest(request, env) {
   const url = new URL(request.url)
   
-  // 健康检查
   if (url.pathname === '/api/health') {
     return new Response(JSON.stringify({ 
       status: 'ok', 
+      version: env.API_VERSION || '1.0.0',
       timestamp: new Date().toISOString()
     }), {
-      headers: { 
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*'
-      }
+      headers: { 'Content-Type': 'application/json' }
     })
-  }
-  
-  // 茶叶记录API
-  if (url.pathname === '/api/tea') {
-    if (request.method === 'GET') {
-      try {
-        const data = await env.TEADIARY_DATA.get('tea_records')
-        return new Response(data || '[]', {
-          headers: { 
-            'Content-Type': 'application/json',
-            'Access-Control-Allow-Origin': '*'
-          }
-        })
-      } catch (e) {
-        return new Response(JSON.stringify({ error: '获取数据失败' }), {
-          status: 500,
-          headers: { 
-            'Content-Type': 'application/json',
-            'Access-Control-Allow-Origin': '*'
-          }
-        })
-      }
-    }
-    
-    if (request.method === 'POST') {
-      try {
-        const newRecord = await request.json()
-        const existingData = await env.TEADIARY_DATA.get('tea_records')
-        const records = existingData ? JSON.parse(existingData) : []
-        
-        newRecord.id = Date.now().toString()
-        newRecord.createdAt = new Date().toISOString()
-        records.push(newRecord)
-        
-        await env.TEADIARY_DATA.put('tea_records', JSON.stringify(records))
-        
-        return new Response(JSON.stringify({ success: true, record: newRecord }), {
-          headers: { 
-            'Content-Type': 'application/json',
-            'Access-Control-Allow-Origin': '*'
-          }
-        })
-      } catch (e) {
-        return new Response(JSON.stringify({ error: '保存数据失败' }), {
-          status: 500,
-          headers: { 
-            'Content-Type': 'application/json',
-            'Access-Control-Allow-Origin': '*'
-          }
-        })
-      }
-    }
-  }
-  
-  // 统计API
-  if (url.pathname === '/api/stats') {
-    try {
-      const data = await env.TEADIARY_DATA.get('tea_records')
-      const records = data ? JSON.parse(data) : []
-      
-      return new Response(JSON.stringify({
-        totalRecords: records.length,
-        lastUpdated: new Date().toISOString()
-      }), {
-        headers: { 
-          'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*'
-        }
-      })
-    } catch (e) {
-      return new Response(JSON.stringify({ error: '获取统计失败' }), {
-        status: 500,
-        headers: { 
-          'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*'
-        }
-      })
-    }
   }
   
   return new Response('API Not Found', { status: 404 })
