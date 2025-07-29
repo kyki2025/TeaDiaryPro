@@ -30,11 +30,62 @@ if (!fs.existsSync('dist')) {
   fs.mkdirSync('dist')
 }
 
-// 复制 public 目录到 dist
+// 复制 public 目录到 dist，但排除 index.html
 if (fs.existsSync('public')) {
-  fs.cpSync('public', 'dist', { recursive: true })
-  console.log('复制 public 目录到 dist')
+  fs.cpSync('public', 'dist', { 
+    recursive: true,
+    filter: (src, dest) => {
+      // 排除 index.html，我们会在构建后生成
+      return !src.endsWith('index.html')
+    }
+  })
+  console.log('复制 public 目录到 dist (排除 index.html)')
 }
+
+// 创建基础的 index.html 模板
+const htmlTemplate = `<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>茶记 - 品茶记录应用</title>
+    <meta name="description" content="记录您的品茶体验，管理茶叶收藏">
+    <meta name="theme-color" content="#10b981">
+    <link rel="manifest" href="/manifest.json">
+    <link rel="icon" href="https://pub-cdn.sider.ai/u/U01AHE70X2G/web-coder/6884695094baea4807e5eee6/resource/ecf96b3c-aa5d-49bc-969f-95d4949947a0.jpg" type="image/png">
+    
+    <!-- PWA相关 -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="茶记">
+    <link rel="apple-touch-icon" href="https://pub-cdn.sider.ai/u/U01AHE70X2G/web-coder/6884695094baea4807e5eee6/resource/ecf96b3c-aa5d-49bc-969f-95d4949947a0.jpg">
+    
+    <!-- 移动端优化 -->
+    <meta name="format-detection" content="telephone=no">
+    <meta name="mobile-web-app-capable" content="yes">
+</head>
+<body>
+    <div id="app"></div>
+    
+    <!-- PWA服务工作者注册 -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then((registration) => {
+                        console.log('SW registered: ', registration);
+                    })
+                    .catch((registrationError) => {
+                        console.log('SW registration failed: ', registrationError);
+                    });
+            });
+        }
+    </script>
+</body>
+</html>`
+
+fs.writeFileSync(path.join('dist', 'index.html'), htmlTemplate)
+console.log('创建 HTML 模板')
 
 /**
  * @type {esbuild.BuildOptions}
