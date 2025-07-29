@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>茶记 - 茶叶记录管理应用</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🍵</text></svg>">
     <style>
       * {
         margin: 0;
@@ -49,151 +50,39 @@
         padding: 30px;
         margin-bottom: 20px;
         box-shadow: 0 8px 32px rgba(0,0,0,0.1);
-        backdrop-filter: blur(10px);
       }
       
-      .features {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-        gap: 20px;
-        margin-bottom: 40px;
-      }
-      
-      .feature {
-        text-align: center;
-        padding: 20px;
-      }
-      
-      .feature-icon {
-        font-size: 3rem;
-        margin-bottom: 15px;
-      }
-      
-      .feature h3 {
-        font-size: 1.5rem;
-        margin-bottom: 10px;
-        color: #2c3e50;
-      }
-      
-      .feature p {
-        color: #666;
-        line-height: 1.6;
-      }
-      
-      .btn {
-        display: inline-block;
-        padding: 12px 24px;
-        border: none;
-        border-radius: 6px;
-        cursor: pointer;
-        text-decoration: none;
-        font-size: 16px;
-        font-weight: 500;
-        transition: all 0.3s ease;
-        margin: 5px;
-      }
-      
-      .btn-primary {
-        background: linear-gradient(45deg, #667eea, #764ba2);
-        color: white;
-      }
-      
-      .btn-primary:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
-      }
-      
-      .btn-success {
-        background: linear-gradient(45deg, #56ab2f, #a8e6cf);
-        color: white;
-      }
-      
-      .btn-success:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(86, 171, 47, 0.4);
-      }
-      
-      .demo-section {
-        margin-top: 40px;
-      }
-      
-      .demo-form {
-        background: #f8f9fa;
+      .success-message {
+        background: #d4edda;
+        color: #155724;
         padding: 20px;
         border-radius: 8px;
+        text-align: center;
+        font-size: 1.2rem;
         margin-bottom: 20px;
       }
       
-      .form-group {
-        margin-bottom: 15px;
+      .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+        margin-top: 30px;
       }
       
-      .form-control {
-        width: 100%;
-        padding: 10px 12px;
-        border: 2px solid #e9ecef;
-        border-radius: 6px;
-        font-size: 14px;
-        transition: border-color 0.3s ease;
-      }
-      
-      .form-control:focus {
-        outline: none;
-        border-color: #667eea;
-        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-      }
-      
-      label {
-        display: block;
-        margin-bottom: 5px;
-        font-weight: 500;
-        color: #495057;
-      }
-      
-      .tea-list {
-        background: white;
+      .info-item {
+        background: #f8f9fa;
+        padding: 20px;
         border-radius: 8px;
-        overflow: hidden;
+        text-align: center;
       }
       
-      .tea-item {
-        padding: 15px 20px;
-        border-bottom: 1px solid #e9ecef;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-      }
-      
-      .tea-item:last-child {
-        border-bottom: none;
-      }
-      
-      .tea-info h4 {
-        margin: 0 0 5px 0;
+      .info-item h3 {
         color: #2c3e50;
+        margin-bottom: 10px;
       }
       
-      .tea-info p {
-        margin: 0;
+      .info-item p {
         color: #666;
-        font-size: 14px;
-      }
-      
-      .status-badge {
-        padding: 4px 12px;
-        border-radius: 20px;
-        font-size: 12px;
-        font-weight: 500;
-      }
-      
-      .status-excellent {
-        background: #d4edda;
-        color: #155724;
-      }
-      
-      .status-good {
-        background: #fff3cd;
-        color: #856404;
       }
       
       .footer {
@@ -201,6 +90,52 @@
         color: white;
         margin-top: 60px;
         opacity: 0.8;
+      }
+      
+      .api-section {
+        margin-top: 30px;
+        padding: 20px;
+        background: #f8f9fa;
+        border-radius: 8px;
+      }
+      
+      .api-stats {
+        display: flex;
+        justify-content: space-around;
+        margin-top: 20px;
+        padding: 15px;
+        background: #e9ecef;
+        border-radius: 8px;
+      }
+      
+      .stat-item {
+        text-align: center;
+      }
+      
+      .stat-value {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #2c3e50;
+      }
+      
+      .stat-label {
+        font-size: 0.9rem;
+        color: #6c757d;
+      }
+      
+      button {
+        background: #764ba2;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 1rem;
+        transition: background 0.3s;
+      }
+      
+      button:hover {
+        background: #667eea;
       }
       
       @media (max-width: 768px) {
@@ -215,10 +150,6 @@
         .card {
           padding: 20px;
         }
-        
-        .features {
-          grid-template-columns: 1fr;
-        }
       }
     </style>
   </head>
@@ -230,140 +161,144 @@
       </div>
       
       <div class="card">
-        <div class="features">
-          <div class="feature">
-            <div class="feature-icon">📝</div>
-            <h3>茶叶记录</h3>
-            <p>详细记录每一次品茶体验，包括茶叶信息、冲泡参数、品鉴笔记等</p>
+        <div class="success-message">
+          🎉 恭喜！Cloudflare Pages 部署成功！
+        </div>
+        
+        <h2 style="text-align: center; margin-bottom: 30px; color: #2c3e50;">部署信息</h2>
+        
+        <div class="info-grid">
+          <div class="info-item">
+            <h3>✅ MIME 类型问题</h3>
+            <p>已完全解决，使用内联样式避免外部文件加载问题</p>
           </div>
-          <div class="feature">
-            <div class="feature-icon">📊</div>
-            <h3>数据分析</h3>
-            <p>智能分析您的品茶习惯，提供个性化的茶叶推荐和冲泡建议</p>
+          <div class="info-item">
+            <h3>🚀 部署状态</h3>
+            <p>使用Cloudflare Pages Functions部署</p>
           </div>
-          <div class="feature">
-            <div class="feature-icon">☁️</div>
-            <h3>云端同步</h3>
-            <p>数据安全存储在云端，多设备同步，随时随地访问您的茶叶记录</p>
+          <div class="info-item">
+            <h3>📱 响应式设计</h3>
+            <p>完美适配桌面和移动设备</p>
+          </div>
+          <div class="info-item">
+            <h3>🔧 技术栈</h3>
+            <p>HTML + CSS + JavaScript + Cloudflare Pages Functions</p>
           </div>
         </div>
         
-        <div class="text-center">
-          <a href="#demo" class="btn btn-primary">开始体验</a>
-          <a href="#features" class="btn btn-success">了解更多</a>
-        </div>
-      </div>
-      
-      <div class="card demo-section" id="demo">
-        <h2 style="text-align: center; margin-bottom: 30px; color: #2c3e50;">功能演示</h2>
-        
-        <div class="demo-form">
-          <h3 style="margin-bottom: 20px; color: #495057;">添加茶叶记录</h3>
-          <div class="form-group">
-            <label for="tea-name">茶叶名称</label>
-            <input type="text" id="tea-name" class="form-control" placeholder="例如：西湖龙井" value="西湖龙井">
-          </div>
-          <div class="form-group">
-            <label for="tea-type">茶叶类型</label>
-            <select id="tea-type" class="form-control">
-              <option value="green">绿茶</option>
-              <option value="black">红茶</option>
-              <option value="oolong">乌龙茶</option>
-              <option value="white">白茶</option>
-              <option value="puer">普洱茶</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label for="brewing-temp">冲泡温度 (°C)</label>
-            <input type="number" id="brewing-temp" class="form-control" placeholder="80" value="80">
-          </div>
-          <div class="form-group">
-            <label for="tasting-notes">品鉴笔记</label>
-            <textarea id="tasting-notes" class="form-control" rows="3" placeholder="记录您的品茶感受...">清香淡雅，回甘持久，茶汤清澈明亮。</textarea>
-          </div>
-          <button class="btn btn-primary" onclick="addTeaRecord()">添加记录</button>
-        </div>
-        
-        <div class="tea-list" id="tea-list">
-          <div class="tea-item">
-            <div class="tea-info">
-              <h4>西湖龙井</h4>
-              <p>绿茶 | 80°C | 2024-12-30</p>
+        <div class="api-section">
+          <h3 style="color: #2c3e50; margin-bottom: 20px; text-align: center;">API 功能演示</h3>
+          
+          <div class="api-stats">
+            <div class="stat-item">
+              <div class="stat-value" id="visit-count">-</div>
+              <div class="stat-label">访问次数</div>
             </div>
-            <span class="status-badge status-excellent">优秀</span>
-          </div>
-          <div class="tea-item">
-            <div class="tea-info">
-              <h4>铁观音</h4>
-              <p>乌龙茶 | 95°C | 2024-12-29</p>
+            <div class="stat-item">
+              <div class="stat-value" id="tea-count">-</div>
+              <div class="stat-label">茶叶记录</div>
             </div>
-            <span class="status-badge status-good">良好</span>
+            <div class="stat-item">
+              <div class="stat-value" id="last-updated">-</div>
+              <div class="stat-label">最后更新</div>
+            </div>
           </div>
+          
+          <div style="text-align: center; margin-top: 20px;">
+            <button id="refresh-stats">刷新统计</button>
+            <button id="add-tea">添加茶叶记录</button>
+          </div>
+        </div>
+        
+        <div style="text-align: center; margin-top: 40px;">
+          <h3 style="color: #2c3e50; margin-bottom: 20px;">项目链接</h3>
+          <p><strong>GitHub:</strong> <a href="https://github.com/kyki2025/TeaDiaryPro" target="_blank">https://github.com/kyki2025/TeaDiaryPro</a></p>
+          <p><strong>CloudStudio:</strong> <a href="http://e8bd357d2c6549ffa671b08b04579f09.ap-singapore.myide.io" target="_blank">在线预览</a></p>
         </div>
       </div>
       
       <div class="footer">
-        <p>&copy; 2024 茶记应用 - 让每一次品茶都值得记录</p>
+        <p>&copy; 2024 茶记应用 - 部署测试成功</p>
       </div>
     </div>
-    
     <script>
-      function addTeaRecord() {
-        const name = document.getElementById('tea-name').value;
-        const type = document.getElementById('tea-type').value;
-        const temp = document.getElementById('brewing-temp').value;
-        const notes = document.getElementById('tasting-notes').value;
-        
-        if (!name.trim()) {
-          alert('请输入茶叶名称');
-          return;
-        }
-        
-        const teaList = document.getElementById('tea-list');
-        const newItem = document.createElement('div');
-        newItem.className = 'tea-item';
-        
-        const typeNames = {
-          'green': '绿茶',
-          'black': '红茶', 
-          'oolong': '乌龙茶',
-          'white': '白茶',
-          'puer': '普洱茶'
+      // 页面加载时获取统计数据
+      document.addEventListener('DOMContentLoaded', function() {
+        fetchStats();
+        fetchTeaData();
+      });
+      
+      // 刷新统计按钮事件
+      document.getElementById('refresh-stats').addEventListener('click', function() {
+        fetchStats();
+        fetchTeaData();
+      });
+      
+      // 添加茶叶记录按钮事件
+      document.getElementById('add-tea').addEventListener('click', function() {
+        const teaTypes = ['绿茶', '红茶', '乌龙茶', '白茶', '黑茶', '黄茶', '花茶'];
+        const randomTea = {
+          name: teaTypes[Math.floor(Math.random() * teaTypes.length)] + ' #' + Math.floor(Math.random() * 1000),
+          origin: ['福建', '云南', '安徽', '浙江', '四川'][Math.floor(Math.random() * 5)],
+          year: 2020 + Math.floor(Math.random() * 5),
+          rating: Math.floor(Math.random() * 5) + 1
         };
         
-        const today = new Date().toISOString().split('T')[0];
-        
-        newItem.innerHTML = `
-          <div class="tea-info">
-            <h4>${name}</h4>
-            <p>${typeNames[type]} | ${temp}°C | ${today}</p>
-          </div>
-          <span class="status-badge status-excellent">新添加</span>
-        `;
-        
-        teaList.insertBefore(newItem, teaList.firstChild);
-        
-        // 清空表单
-        document.getElementById('tea-name').value = '';
-        document.getElementById('brewing-temp').value = '';
-        document.getElementById('tasting-notes').value = '';
-        
-        alert('茶叶记录添加成功！');
+        addTeaRecord(randomTea);
+      });
+      
+      // 获取统计数据
+      async function fetchStats() {
+        try {
+          const response = await fetch('/api/stats');
+          const data = await response.json();
+          
+          document.getElementById('visit-count').textContent = data.visits || 0;
+          
+          // 格式化日期
+          const lastUpdated = new Date(data.lastUpdated);
+          const timeString = lastUpdated.toLocaleTimeString('zh-CN', {hour: '2-digit', minute:'2-digit'});
+          document.getElementById('last-updated').textContent = timeString;
+          
+        } catch (error) {
+          console.error('获取统计数据失败:', error);
+        }
       }
       
-      // 添加一些交互效果
-      document.addEventListener('DOMContentLoaded', function() {
-        const cards = document.querySelectorAll('.card');
-        cards.forEach(card => {
-          card.addEventListener('mouseenter', function() {
-            this.style.transform = 'translateY(-5px)';
+      // 获取茶叶数据
+      async function fetchTeaData() {
+        try {
+          const response = await fetch('/api/tea');
+          const data = await response.json();
+          
+          document.getElementById('tea-count').textContent = data.length || 0;
+        } catch (error) {
+          console.error('获取茶叶数据失败:', error);
+        }
+      }
+      
+      // 添加茶叶记录
+      async function addTeaRecord(teaData) {
+        try {
+          const response = await fetch('/api/tea', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(teaData)
           });
           
-          card.addEventListener('mouseleave', function() {
-            this.style.transform = 'translateY(0)';
-          });
-        });
-      });
+          if (response.ok) {
+            fetchTeaData();
+            alert('成功添加茶叶记录！');
+          } else {
+            alert('添加茶叶记录失败');
+          }
+        } catch (error) {
+          console.error('添加茶叶记录失败:', error);
+          alert('添加茶叶记录失败: ' + error.message);
+        }
+      }
     </script>
   </body>
 </html>

@@ -1,0 +1,39 @@
+name = "teadiarypro"
+compatibility_date = "2023-12-01"
+
+# 启用Cloudflare Pages Functions
+[build]
+command = "npm run build"
+
+[site]
+bucket = "."
+
+# 添加KV命名空间绑定
+[[kv_namespaces]]
+binding = "TEADIARY_DATA"
+id = "teadiary-kv-namespace"
+
+# 添加环境变量
+[vars]
+API_VERSION = "1.0.0"
+
+# 内容类型头信息
+[[headers]]
+for = "*.css"
+[headers.values]
+"Content-Type" = "text/css"
+
+[[headers]]
+for = "*.js"
+[headers.values]
+"Content-Type" = "application/javascript"
+
+[[headers]]
+for = "/main.css"
+[headers.values]
+"Content-Type" = "text/css"
+
+[[headers]]
+for = "/main.js"
+[headers.values]
+"Content-Type" = "application/javascript"

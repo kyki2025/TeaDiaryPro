@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>茶记 - 茶叶记录管理应用</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🍵</text></svg>">
     <style>
       * {
         margin: 0;
@@ -91,6 +92,52 @@
         opacity: 0.8;
       }
       
+      .api-section {
+        margin-top: 30px;
+        padding: 20px;
+        background: #f8f9fa;
+        border-radius: 8px;
+      }
+      
+      .api-stats {
+        display: flex;
+        justify-content: space-around;
+        margin-top: 20px;
+        padding: 15px;
+        background: #e9ecef;
+        border-radius: 8px;
+      }
+      
+      .stat-item {
+        text-align: center;
+      }
+      
+      .stat-value {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #2c3e50;
+      }
+      
+      .stat-label {
+        font-size: 0.9rem;
+        color: #6c757d;
+      }
+      
+      button {
+        background: #764ba2;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 1rem;
+        transition: background 0.3s;
+      }
+      
+      button:hover {
+        background: #667eea;
+      }
+      
       @media (max-width: 768px) {
         .container {
           padding: 10px;
@@ -127,7 +174,7 @@
           </div>
           <div class="info-item">
             <h3>🚀 部署状态</h3>
-            <p>静态文件部署成功，无需构建过程</p>
+            <p>使用Cloudflare Pages Functions部署</p>
           </div>
           <div class="info-item">
             <h3>📱 响应式设计</h3>
@@ -135,7 +182,31 @@
           </div>
           <div class="info-item">
             <h3>🔧 技术栈</h3>
-            <p>纯 HTML + CSS + JavaScript，无依赖</p>
+            <p>HTML + CSS + JavaScript + Cloudflare Pages Functions</p>
+          </div>
+        </div>
+        
+        <div class="api-section">
+          <h3 style="color: #2c3e50; margin-bottom: 20px; text-align: center;">API 功能演示</h3>
+          
+          <div class="api-stats">
+            <div class="stat-item">
+              <div class="stat-value" id="visit-count">-</div>
+              <div class="stat-label">访问次数</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-value" id="tea-count">-</div>
+              <div class="stat-label">茶叶记录</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-value" id="last-updated">-</div>
+              <div class="stat-label">最后更新</div>
+            </div>
+          </div>
+          
+          <div style="text-align: center; margin-top: 20px;">
+            <button id="refresh-stats">刷新统计</button>
+            <button id="add-tea">添加茶叶记录</button>
           </div>
         </div>
         
@@ -150,5 +221,84 @@
         <p>&copy; 2024 茶记应用 - 部署测试成功</p>
       </div>
     </div>
+    <script>
+      // 页面加载时获取统计数据
+      document.addEventListener('DOMContentLoaded', function() {
+        fetchStats();
+        fetchTeaData();
+      });
+      
+      // 刷新统计按钮事件
+      document.getElementById('refresh-stats').addEventListener('click', function() {
+        fetchStats();
+        fetchTeaData();
+      });
+      
+      // 添加茶叶记录按钮事件
+      document.getElementById('add-tea').addEventListener('click', function() {
+        const teaTypes = ['绿茶', '红茶', '乌龙茶', '白茶', '黑茶', '黄茶', '花茶'];
+        const randomTea = {
+          name: teaTypes[Math.floor(Math.random() * teaTypes.length)] + ' #' + Math.floor(Math.random() * 1000),
+          origin: ['福建', '云南', '安徽', '浙江', '四川'][Math.floor(Math.random() * 5)],
+          year: 2020 + Math.floor(Math.random() * 5),
+          rating: Math.floor(Math.random() * 5) + 1
+        };
+        
+        addTeaRecord(randomTea);
+      });
+      
+      // 获取统计数据
+      async function fetchStats() {
+        try {
+          const response = await fetch('/api/stats');
+          const data = await response.json();
+          
+          document.getElementById('visit-count').textContent = data.visits || 0;
+          
+          // 格式化日期
+          const lastUpdated = new Date(data.lastUpdated);
+          const timeString = lastUpdated.toLocaleTimeString('zh-CN', {hour: '2-digit', minute:'2-digit'});
+          document.getElementById('last-updated').textContent = timeString;
+          
+        } catch (error) {
+          console.error('获取统计数据失败:', error);
+        }
+      }
+      
+      // 获取茶叶数据
+      async function fetchTeaData() {
+        try {
+          const response = await fetch('/api/tea');
+          const data = await response.json();
+          
+          document.getElementById('tea-count').textContent = data.length || 0;
+        } catch (error) {
+          console.error('获取茶叶数据失败:', error);
+        }
+      }
+      
+      // 添加茶叶记录
+      async function addTeaRecord(teaData) {
+        try {
+          const response = await fetch('/api/tea', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(teaData)
+          });
+          
+          if (response.ok) {
+            fetchTeaData();
+            alert('成功添加茶叶记录！');
+          } else {
+            alert('添加茶叶记录失败');
+          }
+        } catch (error) {
+          console.error('添加茶叶记录失败:', error);
+          alert('添加茶叶记录失败: ' + error.message);
+        }
+      }
+    </script>
   </body>
 </html>
