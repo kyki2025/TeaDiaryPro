@@ -12,10 +12,10 @@ command = "npm run build"
 [site]
 bucket = "dist"
 
-# KV 命名空间绑定
-[[kv_namespaces]]
-binding = "TEADIARY_DATA"
-id = "teadiary-kv-namespace"
+# KV 命名空间绑定（需要在 Cloudflare 控制台中创建实际的 KV 命名空间）
+# [[kv_namespaces]]
+# binding = "TEADIARY_DATA"
+# id = "your-actual-kv-namespace-id"
 
 # 环境变量
 [vars]
