@@ -1,0 +1,17 @@
+# Cloudflare Pages 配置文件
+[build]
+command = "npm install && npm run build"
+publish = "."
+
+[build.environment]
+NODE_VERSION = "18"
+
+[functions]
+directory = "functions"
+
+[[kv_namespaces]]
+binding = "TEADIARY_DATA"
+id = "teadiary-kv-namespace"
+
+[env]
+API_VERSION = "1.0.0"

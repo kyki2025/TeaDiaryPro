@@ -3,6 +3,45 @@ compatibility_date = "2023-12-01"
 
 # 启用Cloudflare Pages Functions
 [build]
+command = "npm install && npm run build"
+name = "teadiarypro"
+compatibility_date = "2023-12-01"
+
+name = "teadiarypro"
+compatibility_date = "2023-12-01"
+
+# 启用Cloudflare Pages Functions
+[build]
+command = "npm install && npm run build"
+
+# 指定入口点和资产目录
+main = "./functions/_middleware.js"
+
+[site]
+bucket = "."
+name = "teadiarypro"
+compatibility_date = "2023-12-01"
+
+# 启用Cloudflare Pages Functions
+[build]
+command = "npm install && npm run build"
+name = "teadiarypro"
+compatibility_date = "2023-12-01"
+
+name = "teadiarypro"
+compatibility_date = "2023-12-01"
+
+# 启用Cloudflare Pages Functions
+[build]
+command = "npm install && npm run build"
+name = "teadiarypro"
+compatibility_date = "2023-12-01"
+
+name = "teadiarypro"
+compatibility_date = "2023-12-01"
+
+# 启用Cloudflare Pages Functions
+[build]
 command = "npm run build"
 
 # 指定入口点和资产目录
