@@ -1,0 +1,12 @@
+#!/bin/bash
+
+# 包装脚本来处理错误的 wrangler deploy 调用
+if [[ "$1" == "deploy" ]]; then
+    echo "检测到 wrangler deploy 命令"
+    echo "这是一个 Cloudflare Pages 项目，不需要手动部署"
+    echo "静态文件已经构建完成，Pages 会自动处理部署"
+    exit 0
+else
+    # 对于其他 wrangler 命令，调用真正的 wrangler
+    exec /usr/local/bin/wrangler "$@"
+fi
