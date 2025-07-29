@@ -14,10 +14,15 @@ bucket = "dist"
 include = ["**/*"]
 exclude = ["worker.js"]
 
-# KV 命名空间绑定
+# KV 命名空间绑定 - 用于应用数据存储
 [[kv_namespaces]]
 binding = "TEADIARY_DATA"
 id = "f5b0962a0fd1417babacb8b35ae1514b"
+
+# Workers Sites 静态文件存储
+[[kv_namespaces]]
+binding = "__STATIC_CONTENT"
+id = "47301e0b7b8b4e22876fdb3a0a2364f0"
 
 # 环境变量
 [vars]

@@ -14,10 +14,11 @@ export default {
         pathname = '/index.html'
       }
       
-      // 尝试从KV存储中获取文件
+      // 移除开头的斜杠
       const assetKey = pathname.startsWith('/') ? pathname.slice(1) : pathname
       
       try {
+        // 首先尝试直接匹配
         const asset = await env.__STATIC_CONTENT.get(assetKey, { type: 'arrayBuffer' })
         
         if (asset) {
@@ -29,6 +30,29 @@ export default {
             },
           })
         }
+        
+        // 如果直接匹配失败，尝试查找带哈希的文件名
+        const keys = await env.__STATIC_CONTENT.list()
+        const matchingKey = keys.keys.find(key => {
+          // 匹配模式：filename.hash.extension
+          const baseName = assetKey.split('.')[0]
+          const extension = assetKey.split('.').pop()
+          return key.name.startsWith(baseName + '.') && key.name.endsWith('.' + extension)
+        })
+        
+        if (matchingKey) {
+          const hashedAsset = await env.__STATIC_CONTENT.get(matchingKey.name, { type: 'arrayBuffer' })
+          if (hashedAsset) {
+            const contentType = getContentType(assetKey)
+            return new Response(hashedAsset, {
+              headers: {
+                'Content-Type': contentType,
+                'Cache-Control': 'public, max-age=86400',
+              },
+            })
+          }
+        }
+        
       } catch (kvError) {
         console.error('KV error:', kvError)
       }
@@ -36,14 +60,22 @@ export default {
       // 如果找不到文件，对于SPA路由返回index.html
       if (!pathname.includes('.')) {
         try {
-          const indexAsset = await env.__STATIC_CONTENT.get('index.html', { type: 'arrayBuffer' })
-          if (indexAsset) {
-            return new Response(indexAsset, {
-              headers: {
-                'Content-Type': 'text/html',
-                'Cache-Control': 'public, max-age=86400',
-              },
-            })
+          // 查找index.html文件（可能有哈希）
+          const keys = await env.__STATIC_CONTENT.list()
+          const indexKey = keys.keys.find(key => 
+            key.name.startsWith('index.') && key.name.endsWith('.html')
+          )
+          
+          if (indexKey) {
+            const indexAsset = await env.__STATIC_CONTENT.get(indexKey.name, { type: 'arrayBuffer' })
+            if (indexAsset) {
+              return new Response(indexAsset, {
+                headers: {
+                  'Content-Type': 'text/html',
+                  'Cache-Control': 'public, max-age=86400',
+                },
+              })
+            }
           }
         } catch (indexError) {
           console.error('Index error:', indexError)
