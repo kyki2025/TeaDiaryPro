@@ -265,9 +265,6 @@ const TeaRecordForm: React.FC<TeaRecordFormProps> = ({ record, onSave, onCancel 
               value={formData.imageUrl}
               onChange={(value) => handleChange('imageUrl', value)}
             />
-            <p className="text-sm text-gray-500">
-              您也可以使用智能占位图片：https://sider.ai/autoimage/tea
-            </p>
           </div>
 
           {/* 品茶心得 */}
