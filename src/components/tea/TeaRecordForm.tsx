@@ -97,7 +97,7 @@ const TeaRecordForm: React.FC<TeaRecordFormProps> = ({ record, onSave, onCancel 
   return (
     <Card className="w-full max-w-4xl mx-auto">
       <CardHeader>
-        <CardTitle className="text-2xl font-bold text-emerald-700">
+        <CardTitle className="text-3xl font-bold text-emerald-700">
           {record ? '编辑茶记录' : '记录今日品茶'}
         </CardTitle>
       </CardHeader>
@@ -106,33 +106,34 @@ const TeaRecordForm: React.FC<TeaRecordFormProps> = ({ record, onSave, onCancel 
           {/* 基本信息 */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="date">日期</Label>
+              <Label htmlFor="date" className="text-lg">日期</Label>
               <Input
                 id="date"
                 type="date"
                 value={formData.date}
                 onChange={(e) => handleChange('date', e.target.value)}
+                className="text-base"
               />
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="teaName">茶叶名称 *</Label>
+              <Label htmlFor="teaName" className="text-lg">茶叶名称 *</Label>
               <Input
                 id="teaName"
                 placeholder="例如：西湖龙井"
                 value={formData.teaName}
                 onChange={(e) => handleChange('teaName', e.target.value)}
-                className={errors.teaName ? 'border-red-500' : ''}
+                className={`text-base ${errors.teaName ? 'border-red-500' : ''}`}
               />
               {errors.teaName && <p className="text-red-500 text-sm">{errors.teaName}</p>}
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="teaType">茶叶类型 *</Label>
+              <Label htmlFor="teaType" className="text-lg">茶叶类型 *</Label>
               <Select value={formData.teaType} onValueChange={(value) => handleChange('teaType', value)}>
-                <SelectTrigger className={errors.teaType ? 'border-red-500' : ''}>
-                  <SelectValue placeholder="请选择茶叶类型" />
-                </SelectTrigger>
+              <SelectTrigger className={`text-base ${errors.teaType ? 'border-red-500' : ''}`}>
+                <SelectValue placeholder="请选择茶叶类型" />
+              </SelectTrigger>
                 <SelectContent>
                   {teaTypes.map(type => (
                     <SelectItem key={type} value={type}>{type}</SelectItem>
@@ -143,13 +144,13 @@ const TeaRecordForm: React.FC<TeaRecordFormProps> = ({ record, onSave, onCancel 
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="origin">产地 *</Label>
+              <Label htmlFor="origin" className="text-lg">产地 *</Label>
               <Input
                 id="origin"
                 placeholder="例如：浙江杭州"
                 value={formData.origin}
                 onChange={(e) => handleChange('origin', e.target.value)}
-                className={errors.origin ? 'border-red-500' : ''}
+                className={`text-base ${errors.origin ? 'border-red-500' : ''}`}
               />
               {errors.origin && <p className="text-red-500 text-sm">{errors.origin}</p>}
             </div>
@@ -158,19 +159,19 @@ const TeaRecordForm: React.FC<TeaRecordFormProps> = ({ record, onSave, onCancel 
           {/* 冲泡信息 */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="brewingMethod">冲泡方法 *</Label>
+              <Label htmlFor="brewingMethod" className="text-lg">冲泡方法 *</Label>
               <Input
                 id="brewingMethod"
                 placeholder="例如：盖碗冲泡"
                 value={formData.brewingMethod}
                 onChange={(e) => handleChange('brewingMethod', e.target.value)}
-                className={errors.brewingMethod ? 'border-red-500' : ''}
+                className={`text-base ${errors.brewingMethod ? 'border-red-500' : ''}`}
               />
               {errors.brewingMethod && <p className="text-red-500 text-sm">{errors.brewingMethod}</p>}
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="temperature">水温 (°C)</Label>
+              <Label htmlFor="temperature" className="text-lg">水温 (°C)</Label>
               <Input
                 id="temperature"
                 type="number"
@@ -178,17 +179,18 @@ const TeaRecordForm: React.FC<TeaRecordFormProps> = ({ record, onSave, onCancel 
                 max="100"
                 value={formData.temperature}
                 onChange={(e) => handleChange('temperature', parseInt(e.target.value) || 85)}
+                className="text-base"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="brewingTime">冲泡时间 *</Label>
+              <Label htmlFor="brewingTime" className="text-lg">冲泡时间 *</Label>
               <Input
                 id="brewingTime"
                 placeholder="例如：3分钟"
                 value={formData.brewingTime}
                 onChange={(e) => handleChange('brewingTime', e.target.value)}
-                className={errors.brewingTime ? 'border-red-500' : ''}
+                className={`text-base ${errors.brewingTime ? 'border-red-500' : ''}`}
               />
               {errors.brewingTime && <p className="text-red-500 text-sm">{errors.brewingTime}</p>}
             </div>
@@ -196,9 +198,9 @@ const TeaRecordForm: React.FC<TeaRecordFormProps> = ({ record, onSave, onCancel 
 
           {/* 评分 */}
           <div className="space-y-2">
-            <Label htmlFor="rating">综合评分</Label>
+            <Label htmlFor="rating" className="text-lg">综合评分</Label>
             <Select value={formData.rating.toString()} onValueChange={(value) => handleChange('rating', parseInt(value))}>
-              <SelectTrigger>
+              <SelectTrigger className="text-base">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -214,53 +216,57 @@ const TeaRecordForm: React.FC<TeaRecordFormProps> = ({ record, onSave, onCancel 
           {/* 品评详情 */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="appearance">外观描述</Label>
+              <Label htmlFor="appearance" className="text-lg">外观描述</Label>
               <Textarea
                 id="appearance"
                 placeholder="描述茶叶的外观特征..."
                 value={formData.appearance}
                 onChange={(e) => handleChange('appearance', e.target.value)}
                 rows={3}
+                className="text-base"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="aroma">香气描述</Label>
+              <Label htmlFor="aroma" className="text-lg">香气描述</Label>
               <Textarea
                 id="aroma"
                 placeholder="描述茶叶的香气特点..."
                 value={formData.aroma}
                 onChange={(e) => handleChange('aroma', e.target.value)}
                 rows={3}
+                className="text-base"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="taste">口感描述</Label>
+              <Label htmlFor="taste" className="text-lg">口感描述</Label>
               <Textarea
                 id="taste"
                 placeholder="描述茶汤的口感体验..."
                 value={formData.taste}
                 onChange={(e) => handleChange('taste', e.target.value)}
                 rows={3}
+                className="text-base"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="aftertaste">回甘描述</Label>
+              <Label htmlFor="aftertaste" className="text-lg">回甘描述</Label>
               <Textarea
                 id="aftertaste"
                 placeholder="描述茶汤的回甘感受..."
                 value={formData.aftertaste}
                 onChange={(e) => handleChange('aftertaste', e.target.value)}
                 rows={3}
+                className="text-base"
               />
             </div>
           </div>
 
           {/* 茶叶图片 */}
           <div className="space-y-2">
-            <Label>茶叶图片</Label>
+              <Label className="text-lg">茶叶图片</Label>
             <ImageUpload
               value={formData.imageUrl}
               onChange={(value) => handleChange('imageUrl', value)}
@@ -269,14 +275,15 @@ const TeaRecordForm: React.FC<TeaRecordFormProps> = ({ record, onSave, onCancel 
 
           {/* 品茶心得 */}
           <div className="space-y-2">
-            <Label htmlFor="notes">品茶心得</Label>
-            <Textarea
-              id="notes"
-              placeholder="记录您的品茶感受、心得体会..."
-              value={formData.notes}
-              onChange={(e) => handleChange('notes', e.target.value)}
-              rows={4}
-            />
+              <Label htmlFor="notes" className="text-lg">品茶心得</Label>
+              <Textarea
+                id="notes"
+                placeholder="记录您的品茶感受、心得体会..."
+                value={formData.notes}
+                onChange={(e) => handleChange('notes', e.target.value)}
+                rows={4}
+                className="text-base"
+              />
           </div>
 
           {/* 提交按钮 */}
