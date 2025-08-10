@@ -24,7 +24,11 @@ interface TeaRecordFormProps {
 const TeaRecordForm: React.FC<TeaRecordFormProps> = ({ record, onSave, onCancel }) => {
   // 向后兼容：处理旧数据和新数据
   const [imageUrls, setImageUrls] = useState<string[]>(() => {
-    // 如果有旧数据，转换为数组格式
+    // 优先使用新的 imageUrls 数组
+    if (record?.imageUrls && record.imageUrls.length > 0) {
+      return record.imageUrls;
+    }
+    // 向后兼容：使用旧的 imageUrl 字段
     if (record?.imageUrl) {
       return [record.imageUrl];
     }
