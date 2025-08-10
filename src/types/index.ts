@@ -28,6 +28,7 @@ export interface TeaRecord {
   aftertaste: string;
   notes: string;
   imageUrl?: string;
+  imageUrls?: string[]; // 添加多张图片支持
   createdAt: string;
   updatedAt: string;
 }
