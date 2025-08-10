@@ -35,6 +35,8 @@ interface EditingImage {
   cropStart?: { x: number; y: number };
   cropEnd?: { x: number; y: number };
   isDragging?: boolean;
+  isResizing?: boolean;
+  resizeHandle?: string; // 'nw' | 'ne' | 'sw' | 'se' | 'n' | 's' | 'e' | 'w'
 }
 
 const EnhancedImageUpload: React.FC<EnhancedImageUploadProps> = ({ 
@@ -199,28 +201,17 @@ const EnhancedImageUpload: React.FC<EnhancedImageUploadProps> = ({
    */
   const toggleCropMode = () => {
     if (!editingImage) return;
-    const newState = {
+    
+    setEditingImage({
       ...editingImage,
       isCropping: !editingImage.isCropping,
       cropStart: undefined,
       cropEnd: undefined,
       cropData: undefined,
-      isDragging: false
-    };
-    
-    // 如果开启裁剪模式，初始化一个默认的裁剪区域
-    if (!editingImage.isCropping && imageRef.current) {
-      const imgRect = imageRef.current.getBoundingClientRect();
-      const size = Math.min(imgRect.width, imgRect.height) * 0.6;
-      const startX = (imgRect.width - size) / 2;
-      const startY = (imgRect.height - size) / 2;
-      
-      newState.cropStart = { x: startX, y: startY };
-      newState.cropEnd = { x: startX + size, y: startY + size };
-      newState.cropData = { x: startX, y: startY, width: size, height: size };
-    }
-    
-    setEditingImage(newState);
+      isDragging: false,
+      isResizing: false,
+      resizeHandle: undefined
+    });
   };
 
   /**
@@ -621,9 +612,14 @@ const EnhancedImageUpload: React.FC<EnhancedImageUploadProps> = ({
               <div className="space-y-4">
                 <div>
                   <label className="text-sm font-medium">裁剪</label>
-                  {editingImage.isCropping && (
+                  {editingImage.isCropping && !editingImage.cropData && (
                     <div className="text-xs text-gray-500 mt-1 mb-2">
-                      💡 拖拽选择区域，点击绿框内可移动位置
+                      💡 在图片上拖拽鼠标来选择裁剪区域
+                    </div>
+                  )}
+                  {editingImage.isCropping && editingImage.cropData && (
+                    <div className="text-xs text-gray-500 mt-1 mb-2">
+                      💡 点击绿色区域内可移动位置，点击“应用裁剪”确认
                     </div>
                   )}
                   <div className="flex flex-wrap gap-2 mt-2">
