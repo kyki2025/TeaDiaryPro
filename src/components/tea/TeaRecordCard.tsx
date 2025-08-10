@@ -185,9 +185,9 @@ const TeaRecordCard: React.FC<TeaRecordCardProps> = ({ record, onEdit, onDelete 
 
         {/* 茶叶图片 */}
         {(record.imageUrls && record.imageUrls.length > 0) ? (
-          <div className="mb-8">
+          <div className="text-center mb-8">
             <h3 className="font-semibold text-gray-700 mb-4">茶叶图片</h3>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 justify-center">
               {record.imageUrls.map((url, index) => (
                 <img
                   key={index}
