@@ -34,6 +34,7 @@ interface EditingImage {
   isCropping: boolean;
   cropStart?: { x: number; y: number };
   cropEnd?: { x: number; y: number };
+  isDragging?: boolean;
 }
 
 const EnhancedImageUpload: React.FC<EnhancedImageUploadProps> = ({ 
@@ -198,12 +199,28 @@ const EnhancedImageUpload: React.FC<EnhancedImageUploadProps> = ({
    */
   const toggleCropMode = () => {
     if (!editingImage) return;
-    setEditingImage({
+    const newState = {
       ...editingImage,
       isCropping: !editingImage.isCropping,
       cropStart: undefined,
-      cropEnd: undefined
-    });
+      cropEnd: undefined,
+      cropData: undefined,
+      isDragging: false
+    };
+    
+    // 如果开启裁剪模式，初始化一个默认的裁剪区域
+    if (!editingImage.isCropping && imageRef.current) {
+      const imgRect = imageRef.current.getBoundingClientRect();
+      const size = Math.min(imgRect.width, imgRect.height) * 0.6;
+      const startX = (imgRect.width - size) / 2;
+      const startY = (imgRect.height - size) / 2;
+      
+      newState.cropStart = { x: startX, y: startY };
+      newState.cropEnd = { x: startX + size, y: startY + size };
+      newState.cropData = { x: startX, y: startY, width: size, height: size };
+    }
+    
+    setEditingImage(newState);
   };
 
   /**
@@ -212,50 +229,92 @@ const EnhancedImageUpload: React.FC<EnhancedImageUploadProps> = ({
   const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!editingImage?.isCropping || !imageRef.current) return;
     
+    e.preventDefault();
     const rect = imageRef.current.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
     
-    setEditingImage({
-      ...editingImage,
-      cropStart: { x, y },
-      cropEnd: { x, y }
-    });
+    // 检查是否点击在现有裁剪区域内（用于移动）
+    const { cropData } = editingImage;
+    if (cropData && 
+        x >= cropData.x && x <= cropData.x + cropData.width &&
+        y >= cropData.y && y <= cropData.y + cropData.height) {
+      // 移动模式
+      setEditingImage({
+        ...editingImage,
+        isDragging: true,
+        cropStart: { x: x - cropData.x, y: y - cropData.y } // 存储相对位置
+      });
+    } else {
+      // 新建裁剪区域
+      setEditingImage({
+        ...editingImage,
+        cropStart: { x, y },
+        cropEnd: { x, y },
+        isDragging: false,
+        cropData: undefined
+      });
+    }
   };
 
   /**
    * 处理鼠标移动事件 - 更新裁剪区域
    */
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!editingImage?.isCropping || !editingImage.cropStart || !imageRef.current) return;
+    if (!editingImage?.isCropping || !imageRef.current) return;
     
     const rect = imageRef.current.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
+    const x = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
+    const y = Math.max(0, Math.min(e.clientY - rect.top, rect.height));
     
-    setEditingImage({
-      ...editingImage,
-      cropEnd: { x, y }
-    });
+    if (editingImage.isDragging && editingImage.cropData && editingImage.cropStart) {
+      // 移动现有裁剪区域
+      const newX = Math.max(0, Math.min(x - editingImage.cropStart.x, rect.width - editingImage.cropData.width));
+      const newY = Math.max(0, Math.min(y - editingImage.cropStart.y, rect.height - editingImage.cropData.height));
+      
+      setEditingImage({
+        ...editingImage,
+        cropData: {
+          ...editingImage.cropData,
+          x: newX,
+          y: newY
+        }
+      });
+    } else if (editingImage.cropStart) {
+      // 调整裁剪区域大小
+      setEditingImage({
+        ...editingImage,
+        cropEnd: { x, y }
+      });
+    }
   };
 
   /**
    * 处理鼠标释放事件 - 完成裁剪
    */
   const handleMouseUp = () => {
-    if (!editingImage?.cropStart || !editingImage?.cropEnd) return;
+    if (!editingImage) return;
     
-    const { cropStart, cropEnd } = editingImage;
-    const width = Math.abs(cropEnd.x - cropStart.x);
-    const height = Math.abs(cropEnd.y - cropStart.y);
-    const x = Math.min(cropStart.x, cropEnd.x);
-    const y = Math.min(cropStart.y, cropEnd.y);
-    
-    if (width > 10 && height > 10) {
+    if (editingImage.isDragging) {
       setEditingImage({
         ...editingImage,
-        cropData: { x, y, width, height }
+        isDragging: false
       });
+    } else if (editingImage.cropStart && editingImage.cropEnd) {
+      const { cropStart, cropEnd } = editingImage;
+      const width = Math.abs(cropEnd.x - cropStart.x);
+      const height = Math.abs(cropEnd.y - cropStart.y);
+      const x = Math.min(cropStart.x, cropEnd.x);
+      const y = Math.min(cropStart.y, cropEnd.y);
+      
+      if (width > 20 && height > 20) {
+        setEditingImage({
+          ...editingImage,
+          cropData: { x, y, width, height },
+          cropStart: undefined,
+          cropEnd: undefined
+        });
+      }
     }
   };
 
@@ -366,24 +425,75 @@ const EnhancedImageUpload: React.FC<EnhancedImageUploadProps> = ({
    * 获取裁剪区域的样式
    */
   const getCropAreaStyle = () => {
-    if (!editingImage?.cropStart || !editingImage?.cropEnd) return {};
+    // 优先显示固定的裁剪区域
+    if (editingImage?.cropData) {
+      const { cropData } = editingImage;
+      return {
+        position: 'absolute' as const,
+        left: `${cropData.x}px`,
+        top: `${cropData.y}px`,
+        width: `${cropData.width}px`,
+        height: `${cropData.height}px`,
+        border: '2px solid #10b981',
+        backgroundColor: 'rgba(16, 185, 129, 0.1)',
+        pointerEvents: 'auto' as const,
+        cursor: 'move',
+        boxShadow: '0 0 10px rgba(16, 185, 129, 0.3)'
+      };
+    }
     
-    const { cropStart, cropEnd } = editingImage;
-    const left = Math.min(cropStart.x, cropEnd.x);
-    const top = Math.min(cropStart.y, cropEnd.y);
-    const width = Math.abs(cropEnd.x - cropStart.x);
-    const height = Math.abs(cropEnd.y - cropStart.y);
+    // 显示正在绘制的裁剪区域
+    if (editingImage?.cropStart && editingImage?.cropEnd) {
+      const { cropStart, cropEnd } = editingImage;
+      const left = Math.min(cropStart.x, cropEnd.x);
+      const top = Math.min(cropStart.y, cropEnd.y);
+      const width = Math.abs(cropEnd.x - cropStart.x);
+      const height = Math.abs(cropEnd.y - cropStart.y);
+      
+      return {
+        position: 'absolute' as const,
+        left: `${left}px`,
+        top: `${top}px`,
+        width: `${width}px`,
+        height: `${height}px`,
+        border: '2px dashed #10b981',
+        backgroundColor: 'rgba(16, 185, 129, 0.1)',
+        pointerEvents: 'none'
+      };
+    }
     
-    return {
-      position: 'absolute' as const,
-      left: `${left}px`,
-      top: `${top}px`,
-      width: `${width}px`,
-      height: `${height}px`,
-      border: '2px dashed #10b981',
-      backgroundColor: 'rgba(16, 185, 129, 0.1)',
-      pointerEvents: 'none'
-    };
+    return {};
+  };
+  
+  /**
+   * 一键正方形裁剪
+   */
+  const setSquareCrop = () => {
+    if (!editingImage || !imageRef.current) return;
+    
+    const imgRect = imageRef.current.getBoundingClientRect();
+    const size = Math.min(imgRect.width, imgRect.height) * 0.8;
+    const startX = (imgRect.width - size) / 2;
+    const startY = (imgRect.height - size) / 2;
+    
+    setEditingImage({
+      ...editingImage,
+      cropData: { x: startX, y: startY, width: size, height: size }
+    });
+  };
+  
+  /**
+   * 重置裁剪区域
+   */
+  const resetCrop = () => {
+    if (!editingImage) return;
+    
+    setEditingImage({
+      ...editingImage,
+      cropData: undefined,
+      cropStart: undefined,
+      cropEnd: undefined
+    });
   };
 
   return (
@@ -511,7 +621,12 @@ const EnhancedImageUpload: React.FC<EnhancedImageUploadProps> = ({
               <div className="space-y-4">
                 <div>
                   <label className="text-sm font-medium">裁剪</label>
-                  <div className="flex gap-2 mt-2">
+                  {editingImage.isCropping && (
+                    <div className="text-xs text-gray-500 mt-1 mb-2">
+                      💡 拖拽选择区域，点击绿框内可移动位置
+                    </div>
+                  )}
+                  <div className="flex flex-wrap gap-2 mt-2">
                     <Button
                       type="button"
                       variant={editingImage.isCropping ? "default" : "outline"}
@@ -521,12 +636,35 @@ const EnhancedImageUpload: React.FC<EnhancedImageUploadProps> = ({
                       <Crop className="w-4 h-4 mr-2" />
                       {editingImage.isCropping ? '取消裁剪' : '开始裁剪'}
                     </Button>
+                    {editingImage.isCropping && (
+                      <>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={setSquareCrop}
+                        >
+                          <Maximize className="w-4 h-4 mr-2" />
+                          正方形
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={resetCrop}
+                        >
+                          <X className="w-4 h-4 mr-2" />
+                          重置
+                        </Button>
+                      </>
+                    )}
                     {editingImage.cropData && (
                       <Button
                         type="button"
                         variant="outline"
                         size="sm"
                         onClick={applyCrop}
+                        className="bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100"
                       >
                         <Check className="w-4 h-4 mr-2" />
                         应用裁剪
