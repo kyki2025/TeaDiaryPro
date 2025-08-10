@@ -112,7 +112,8 @@ const TeaRecordForm: React.FC<TeaRecordFormProps> = ({ record, onSave, onCancel 
       ...formData,
       // 保持向后兼容
       imageUrl: imageUrls[0] || '',
-      // 可以扩展支持imageUrls字段
+      // 添加对多张图片的支持
+      imageUrls: imageUrls
     };
 
     onSave(submitData);

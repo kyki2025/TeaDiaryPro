@@ -184,15 +184,34 @@ const TeaRecordCard: React.FC<TeaRecordCardProps> = ({ record, onEdit, onDelete 
         )}
 
         {/* 茶叶图片 */}
-        {record.imageUrl && (
-          <div className="mt-4">
-            <img
-              src={record.imageUrl}
-              alt={record.teaName}
-              className="w-full h-48 object-cover rounded-md"
-            />
+        {(record.imageUrls && record.imageUrls.length > 0) ? (
+          <div className="mb-8">
+            <h3 className="font-semibold text-gray-700 mb-4">茶叶图片</h3>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+              {record.imageUrls.map((url, index) => (
+                <img
+                  key={index}
+                  src={url}
+                  alt={`${record.teaName}-${index + 1}`}
+                  className="max-w-full max-h-48 object-contain rounded-lg border shadow-sm"
+                  crossOrigin="anonymous"
+                />
+              ))}
+            </div>
           </div>
-        )}
+        ) : record.imageUrl ? (
+          <div className="text-center mb-8">
+            <h3 className="font-semibold text-gray-700 mb-4">茶叶图片</h3>
+            <div className="flex justify-center">
+              <img
+                src={record.imageUrl}
+                alt={record.teaName}
+                className="max-w-full max-h-64 object-contain rounded-lg border shadow-sm"
+                crossOrigin="anonymous"
+              />
+            </div>
+          </div>
+        ) : null}
       </CardContent>
     </Card>
 
