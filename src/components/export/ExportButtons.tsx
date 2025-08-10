@@ -124,9 +124,9 @@ const ExportButtons: React.FC<ExportButtonsProps> = ({ records, username }) => {
             ${(record.imageUrls && record.imageUrls.length > 0) ? `
                 <div class="description">
                     <div class="description-title">茶叶图片:</div>
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-top: 10px;">
+                    <div style="display: flex; flex-wrap: wrap; gap: 16px; justify-content: center; margin-top: 10px;">
                         ${record.imageUrls.map((url, index) => `
-                            <img src="${url}" alt="${record.teaName}-${index + 1}" style="max-width: 100%; max-height: 150px; border-radius: 4px; border: 1px solid #e5e7eb; object-fit: contain;" />
+                            <img src="${url}" alt="${record.teaName}-${index + 1}" style="width: 120px; height: 120px; border-radius: 8px; border: 1px solid #e5e7eb; object-fit: cover; box-shadow: 0 1px 3px rgba(0,0,0,0.1);" />
                         `).join('')}
                     </div>
                 </div>

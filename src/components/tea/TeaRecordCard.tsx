@@ -304,13 +304,13 @@ const TeaRecordCard: React.FC<TeaRecordCardProps> = ({ record, onEdit, onDelete 
           {(record.imageUrls && record.imageUrls.length > 0) ? (
             <div className="text-center mb-8">
               <h3 className="font-semibold text-gray-700 mb-4">茶叶图片</h3>
-              <div className="grid grid-cols-2 gap-4 justify-center">
+              <div className="flex flex-wrap gap-4 justify-center">
                 {record.imageUrls.map((url, index) => (
                   <img
                     key={index}
                     src={url}
                     alt={`${record.teaName}-${index + 1}`}
-                    className="max-w-full max-h-48 object-contain rounded-lg border shadow-sm"
+                    className="w-32 h-32 object-cover rounded-lg border shadow-sm"
                     crossOrigin="anonymous"
                   />
                 ))}
