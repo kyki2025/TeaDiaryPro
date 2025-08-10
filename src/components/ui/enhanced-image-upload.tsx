@@ -35,6 +35,7 @@ interface EditingImage {
   cropStart?: { x: number; y: number };
   cropEnd?: { x: number; y: number };
   isDragging?: boolean;
+  isDrawing?: boolean; // 正在绘制新的裁剪区域
   isResizing?: boolean;
   resizeHandle?: string; // 'nw' | 'ne' | 'sw' | 'se' | 'n' | 's' | 'e' | 'w'
 }
@@ -221,6 +222,7 @@ const EnhancedImageUpload: React.FC<EnhancedImageUploadProps> = ({
     if (!editingImage?.isCropping || !imageRef.current) return;
     
     e.preventDefault();
+    e.stopPropagation();
     const rect = imageRef.current.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
@@ -234,6 +236,7 @@ const EnhancedImageUpload: React.FC<EnhancedImageUploadProps> = ({
       setEditingImage({
         ...editingImage,
         isDragging: true,
+        isDrawing: false,
         cropStart: { x: x - cropData.x, y: y - cropData.y } // 存储相对位置
       });
     } else {
@@ -243,6 +246,7 @@ const EnhancedImageUpload: React.FC<EnhancedImageUploadProps> = ({
         cropStart: { x, y },
         cropEnd: { x, y },
         isDragging: false,
+        isDrawing: true,
         cropData: undefined
       });
     }
@@ -271,8 +275,8 @@ const EnhancedImageUpload: React.FC<EnhancedImageUploadProps> = ({
           y: newY
         }
       });
-    } else if (editingImage.cropStart) {
-      // 调整裁剪区域大小
+    } else if (editingImage.isDrawing && editingImage.cropStart) {
+      // 正在创建新的裁剪区域
       setEditingImage({
         ...editingImage,
         cropEnd: { x, y }
@@ -291,7 +295,7 @@ const EnhancedImageUpload: React.FC<EnhancedImageUploadProps> = ({
         ...editingImage,
         isDragging: false
       });
-    } else if (editingImage.cropStart && editingImage.cropEnd) {
+    } else if (editingImage.isDrawing && editingImage.cropStart && editingImage.cropEnd) {
       const { cropStart, cropEnd } = editingImage;
       const width = Math.abs(cropEnd.x - cropStart.x);
       const height = Math.abs(cropEnd.y - cropStart.y);
@@ -303,7 +307,16 @@ const EnhancedImageUpload: React.FC<EnhancedImageUploadProps> = ({
           ...editingImage,
           cropData: { x, y, width, height },
           cropStart: undefined,
-          cropEnd: undefined
+          cropEnd: undefined,
+          isDrawing: false
+        });
+      } else {
+        // 如果裁剪区域太小，清理状态
+        setEditingImage({
+          ...editingImage,
+          cropStart: undefined,
+          cropEnd: undefined,
+          isDrawing: false
         });
       }
     }
@@ -602,7 +615,7 @@ const EnhancedImageUpload: React.FC<EnhancedImageUploadProps> = ({
                       maxHeight: '400px'
                     }}
                   />
-                  {editingImage.isCropping && editingImage.cropStart && editingImage.cropEnd && (
+                  {editingImage.isCropping && (editingImage.cropData || (editingImage.cropStart && editingImage.cropEnd)) && (
                     <div style={getCropAreaStyle()} />
                   )}
                 </div>
