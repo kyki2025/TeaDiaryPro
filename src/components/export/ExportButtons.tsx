@@ -121,7 +121,16 @@ const ExportButtons: React.FC<ExportButtonsProps> = ({ records, username }) => {
                 </div>
             ` : ''}
             
-            ${record.imageUrl ? `
+            ${(record.imageUrls && record.imageUrls.length > 0) ? `
+                <div class="description">
+                    <div class="description-title">茶叶图片:</div>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-top: 10px;">
+                        ${record.imageUrls.map((url, index) => `
+                            <img src="${url}" alt="${record.teaName}-${index + 1}" style="max-width: 100%; max-height: 150px; border-radius: 4px; border: 1px solid #e5e7eb; object-fit: contain;" />
+                        `).join('')}
+                    </div>
+                </div>
+            ` : record.imageUrl ? `
                 <div class="description">
                     <div class="description-title">茶叶图片:</div>
                     <div style="margin-top: 10px;">
@@ -177,7 +186,12 @@ const ExportButtons: React.FC<ExportButtonsProps> = ({ records, username }) => {
       '口感': truncateText(record.taste, 1000),
       '回甘': truncateText(record.aftertaste, 1000),
       '心得': truncateText(record.notes, 5000),
-      '图片链接': truncateText(record.imageUrl || '无', 2000),
+      '图片链接': truncateText(
+        (record.imageUrls && record.imageUrls.length > 0) 
+          ? record.imageUrls.join('; ') 
+          : (record.imageUrl || '无'), 
+        2000
+      ),
       '创建时间': new Date(record.createdAt).toLocaleString('zh-CN')
     }));
 
