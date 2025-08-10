@@ -5,7 +5,7 @@
 
 import React, { useState, useRef, useCallback } from 'react';
 import { Button } from './button';
-import { Upload, X, Image as ImageIcon, RotateCcw, Crop, Check, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Upload, X, Image as ImageIcon, RotateCcw, Crop, Check, ChevronLeft, ChevronRight, Maximize, Minimize } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from './dialog';
 import { Slider } from './slider';
@@ -18,17 +18,22 @@ interface EnhancedImageUploadProps {
   maxSize?: number; // MB
 }
 
+interface CropData {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
 interface EditingImage {
   base64: string;
   rotation: number;
   brightness: number;
   contrast: number;
-  cropData?: {
-    x: number;
-    y: number;
-    width: number;
-    height: number;
-  };
+  cropData?: CropData;
+  isCropping: boolean;
+  cropStart?: { x: number; y: number };
+  cropEnd?: { x: number; y: number };
 }
 
 const EnhancedImageUpload: React.FC<EnhancedImageUploadProps> = ({ 
@@ -43,7 +48,7 @@ const EnhancedImageUpload: React.FC<EnhancedImageUploadProps> = ({
   const [editingImage, setEditingImage] = useState<EditingImage | null>(null);
   const [editingIndex, setEditingIndex] = useState<number>(-1);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const imageRef = useRef<HTMLImageElement>(null);
 
   /**
    * 将文件转换为Base64字符串
@@ -181,9 +186,123 @@ const EnhancedImageUpload: React.FC<EnhancedImageUploadProps> = ({
       base64: value[index],
       rotation: 0,
       brightness: 100,
-      contrast: 100
+      contrast: 100,
+      isCropping: false,
+      cropData: undefined
     });
     setEditingIndex(index);
+  };
+
+  /**
+   * 处理裁剪模式切换
+   */
+  const toggleCropMode = () => {
+    if (!editingImage) return;
+    setEditingImage({
+      ...editingImage,
+      isCropping: !editingImage.isCropping,
+      cropStart: undefined,
+      cropEnd: undefined
+    });
+  };
+
+  /**
+   * 处理鼠标按下事件 - 开始裁剪
+   */
+  const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!editingImage?.isCropping || !imageRef.current) return;
+    
+    const rect = imageRef.current.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    
+    setEditingImage({
+      ...editingImage,
+      cropStart: { x, y },
+      cropEnd: { x, y }
+    });
+  };
+
+  /**
+   * 处理鼠标移动事件 - 更新裁剪区域
+   */
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!editingImage?.isCropping || !editingImage.cropStart || !imageRef.current) return;
+    
+    const rect = imageRef.current.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    
+    setEditingImage({
+      ...editingImage,
+      cropEnd: { x, y }
+    });
+  };
+
+  /**
+   * 处理鼠标释放事件 - 完成裁剪
+   */
+  const handleMouseUp = () => {
+    if (!editingImage?.cropStart || !editingImage?.cropEnd) return;
+    
+    const { cropStart, cropEnd } = editingImage;
+    const width = Math.abs(cropEnd.x - cropStart.x);
+    const height = Math.abs(cropEnd.y - cropStart.y);
+    const x = Math.min(cropStart.x, cropEnd.x);
+    const y = Math.min(cropStart.y, cropEnd.y);
+    
+    if (width > 10 && height > 10) {
+      setEditingImage({
+        ...editingImage,
+        cropData: { x, y, width, height }
+      });
+    }
+  };
+
+  /**
+   * 应用裁剪
+   */
+  const applyCrop = async () => {
+    if (!editingImage?.cropData || !imageRef.current) return;
+
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d')!;
+      
+      const { cropData } = editingImage;
+      const scaleX = img.naturalWidth / imageRef.current!.width;
+      const scaleY = img.naturalHeight / imageRef.current!.height;
+      
+      const actualCrop = {
+        x: cropData.x * scaleX,
+        y: cropData.y * scaleY,
+        width: cropData.width * scaleX,
+        height: cropData.height * scaleY
+      };
+      
+      canvas.width = actualCrop.width;
+      canvas.height = actualCrop.height;
+      
+      ctx.drawImage(
+        img,
+        actualCrop.x, actualCrop.y, actualCrop.width, actualCrop.height,
+        0, 0, actualCrop.width, actualCrop.height
+      );
+      
+      const croppedBase64 = canvas.toDataURL('image/jpeg', 0.9);
+      
+      setEditingImage({
+        ...editingImage,
+        base64: croppedBase64,
+        cropData: undefined,
+        isCropping: false,
+        cropStart: undefined,
+        cropEnd: undefined
+      });
+    };
+    
+    img.src = editingImage.base64;
   };
 
   /**
@@ -192,15 +311,21 @@ const EnhancedImageUpload: React.FC<EnhancedImageUploadProps> = ({
   const handleSaveEdit = () => {
     if (!editingImage || editingIndex === -1) return;
 
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d')!;
     const img = new Image();
-
     img.onload = () => {
-      canvas.width = img.width;
-      canvas.height = img.height;
-
-      // 应用编辑效果
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d')!;
+      
+      let { width, height } = img;
+      
+      // 应用旋转后的尺寸计算
+      if (editingImage.rotation % 180 !== 0) {
+        [width, height] = [height, width];
+      }
+      
+      canvas.width = width;
+      canvas.height = height;
+      
       ctx.save();
       
       // 旋转
@@ -209,23 +334,22 @@ const EnhancedImageUpload: React.FC<EnhancedImageUploadProps> = ({
         ctx.rotate((editingImage.rotation * Math.PI) / 180);
         ctx.translate(-canvas.width / 2, -canvas.height / 2);
       }
-
+      
       // 亮度和对比度
       ctx.filter = `brightness(${editingImage.brightness}%) contrast(${editingImage.contrast}%)`;
-      ctx.drawImage(img, 0, 0);
-
+      ctx.drawImage(img, -canvas.width / 2, -canvas.height / 2, img.width, img.height);
+      
       ctx.restore();
-
-      // 保存编辑后的图片
+      
       const editedBase64 = canvas.toDataURL('image/jpeg', 0.9);
       const newImages = [...value];
       newImages[editingIndex] = editedBase64;
       onChange(newImages);
-
+      
       setEditingImage(null);
       setEditingIndex(-1);
     };
-
+    
     img.src = editingImage.base64;
   };
 
@@ -236,6 +360,30 @@ const EnhancedImageUpload: React.FC<EnhancedImageUploadProps> = ({
     if (!editingImage) return;
     const newRotation = editingImage.rotation + (direction === 'left' ? -90 : 90);
     setEditingImage({ ...editingImage, rotation: newRotation });
+  };
+
+  /**
+   * 获取裁剪区域的样式
+   */
+  const getCropAreaStyle = () => {
+    if (!editingImage?.cropStart || !editingImage?.cropEnd) return {};
+    
+    const { cropStart, cropEnd } = editingImage;
+    const left = Math.min(cropStart.x, cropEnd.x);
+    const top = Math.min(cropStart.y, cropEnd.y);
+    const width = Math.abs(cropEnd.x - cropStart.x);
+    const height = Math.abs(cropEnd.y - cropStart.y);
+    
+    return {
+      position: 'absolute' as const,
+      left: `${left}px`,
+      top: `${top}px`,
+      width: `${width}px`,
+      height: `${height}px`,
+      border: '2px dashed #10b981',
+      backgroundColor: 'rgba(16, 185, 129, 0.1)',
+      pointerEvents: 'none'
+    };
   };
 
   return (
@@ -334,20 +482,59 @@ const EnhancedImageUpload: React.FC<EnhancedImageUploadProps> = ({
             <div className="space-y-4">
               {/* 预览区域 */}
               <div className="flex justify-center">
-                <img
-                  src={editingImage.base64}
-                  alt="编辑预览"
-                  style={{
-                    transform: `rotate(${editingImage.rotation}deg)`,
-                    filter: `brightness(${editingImage.brightness}%) contrast(${editingImage.contrast}%)`,
-                    maxWidth: '100%',
-                    maxHeight: '400px'
-                  }}
-                />
+                <div 
+                  className="relative inline-block"
+                  onMouseDown={handleMouseDown}
+                  onMouseMove={handleMouseMove}
+                  onMouseUp={handleMouseUp}
+                  onMouseLeave={handleMouseUp}
+                  style={{ cursor: editingImage.isCropping ? 'crosshair' : 'default' }}
+                >
+                  <img
+                    ref={imageRef}
+                    src={editingImage.base64}
+                    alt="编辑预览"
+                    style={{
+                      transform: `rotate(${editingImage.rotation}deg)`,
+                      filter: `brightness(${editingImage.brightness}%) contrast(${editingImage.contrast}%)`,
+                      maxWidth: '100%',
+                      maxHeight: '400px'
+                    }}
+                  />
+                  {editingImage.isCropping && editingImage.cropStart && editingImage.cropEnd && (
+                    <div style={getCropAreaStyle()} />
+                  )}
+                </div>
               </div>
 
               {/* 编辑控件 */}
               <div className="space-y-4">
+                <div>
+                  <label className="text-sm font-medium">裁剪</label>
+                  <div className="flex gap-2 mt-2">
+                    <Button
+                      type="button"
+                      variant={editingImage.isCropping ? "default" : "outline"}
+                      size="sm"
+                      onClick={toggleCropMode}
+                    >
+                      <Crop className="w-4 h-4 mr-2" />
+                      {editingImage.isCropping ? '取消裁剪' : '开始裁剪'}
+                    </Button>
+                    {editingImage.cropData && (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={applyCrop}
+                      >
+                        <Check className="w-4 h-4 mr-2" />
+                        应用裁剪
+                      </Button>
+                    )}
+                  </div>
+                </div>
+
                 <div>
                   <label className="text-sm font-medium">旋转</label>
                   <div className="flex gap-2 mt-2">
