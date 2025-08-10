@@ -1,6 +1,7 @@
 /**
  * 茶记录表单组件
  * 用于创建和编辑茶记录信息
+ * 支持多张图片上传和增强的图片编辑功能
  */
 
 import React, { useState, useEffect } from 'react';
@@ -12,7 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { TeaRecord } from '../../types';
 import { Save, X } from 'lucide-react';
-import ImageUpload from '../ui/image-upload';
+import EnhancedImageUpload from '../ui/enhanced-image-upload';
 
 interface TeaRecordFormProps {
   record?: TeaRecord;
@@ -21,6 +22,15 @@ interface TeaRecordFormProps {
 }
 
 const TeaRecordForm: React.FC<TeaRecordFormProps> = ({ record, onSave, onCancel }) => {
+  // 向后兼容：处理旧数据和新数据
+  const [imageUrls, setImageUrls] = useState<string[]>(() => {
+    // 如果有旧数据，转换为数组格式
+    if (record?.imageUrl) {
+      return [record.imageUrl];
+    }
+    return [];
+  });
+
   const [formData, setFormData] = useState({
     date: record?.date || new Date().toISOString().split('T')[0],
     teaName: record?.teaName || '',
@@ -35,6 +45,7 @@ const TeaRecordForm: React.FC<TeaRecordFormProps> = ({ record, onSave, onCancel 
     taste: record?.taste || '',
     aftertaste: record?.aftertaste || '',
     notes: record?.notes || '',
+    // 保持向后兼容的imageUrl字段
     imageUrl: record?.imageUrl || '',
   });
 
@@ -49,6 +60,15 @@ const TeaRecordForm: React.FC<TeaRecordFormProps> = ({ record, onSave, onCancel 
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: '' }));
     }
+  };
+
+  /**
+   * 处理图片URL变化
+   */
+  const handleImageUrlsChange = (urls: string[]) => {
+    setImageUrls(urls);
+    // 向后兼容：设置第一张图片到imageUrl
+    setFormData(prev => ({ ...prev, imageUrl: urls[0] || '' }));
   };
 
   /**
@@ -87,7 +107,15 @@ const TeaRecordForm: React.FC<TeaRecordFormProps> = ({ record, onSave, onCancel 
       return;
     }
 
-    onSave(formData);
+    // 构建提交数据
+    const submitData = {
+      ...formData,
+      // 保持向后兼容
+      imageUrl: imageUrls[0] || '',
+      // 可以扩展支持imageUrls字段
+    };
+
+    onSave(submitData);
   };
 
   const teaTypes = [
@@ -264,15 +292,17 @@ const TeaRecordForm: React.FC<TeaRecordFormProps> = ({ record, onSave, onCancel 
             </div>
           </div>
 
-          {/* 茶叶图片 */}
+          {/* 茶叶图片 - 使用增强版组件 */}
           <div className="space-y-2">
-              <Label className="text-lg">茶叶图片</Label>
-            <ImageUpload
-              value={formData.imageUrl}
-              onChange={(value) => handleChange('imageUrl', value)}
+            <Label className="text-lg">茶叶图片</Label>
+            <EnhancedImageUpload
+              value={imageUrls}
+              onChange={handleImageUrlsChange}
+              maxImages={5}
+              maxSize={10}
             />
             <p className="text-sm text-gray-500">
-              您也可以使用智能占位图片：https://sider.ai/autoimage/tea
+              支持批量上传，最多5张图片，每张最大10MB。支持拖拽、裁剪、旋转等编辑功能。
             </p>
           </div>
 
